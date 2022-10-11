@@ -1,0 +1,148 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+svg {
+    pointer-events: none;
+}
+
+.border {
+    position: absolute;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    top: 0;
+    left: 0;
+    border: 1px solid transparent;
+    pointer-events: none;
+    z-index: 99;
+    background-size: cover;
+}
+
+#preloader {
+    background: white;
+}
+
+#preloader-icon {
+    width: 24px;
+    height: 24px;
+    top: calc(50% - 12px);
+    left: calc(50% - 12px);
+    position: absolute;
+    animation: rotation 1s ease-in-out infinite;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.line {
+    stroke: #00c6f6;
+    stroke-width: 1;
+}
+
+.cta,
+.replay,
+.audio_btn,
+.button_mute,
+.button_unmute {
+    position: absolute;
+    overflow: hidden;
+}
+
+.replay {
+    width: 24px;
+    height: 24px;
+}
+
+.audio_btn {
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+}
+
+.button_mute,
+.button_unmute {
+    width: 28%;
+    height: 28%;
+    top: 15%;
+    left: 15%;
+}
+
+.button_unmute {
+    background-position: 0% 50%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 65%;
+    height: 65%;
+    top: 0;
+    left: 0;
+}
+
+.button_mute {
+    display: grid;
+    column-gap: 1px;
+}
+
+.bar {
+    pointer-events: none;
+}
+
+.cta_off,
+.cta_on,
+.cta_flare {
+    position: inherit;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    background-size: cover;
+    pointer-events: none;
+}
+
+.cta_on {
+    opacity: 0;
+}
+
+#resolve_cta_border {
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    border: 1px solid #ff3c00;
+}
+
+#replay_icon {
+    position: inherit;
+    width: 50%;
+    height: 50%;
+    top: 2px;
+    left: 2px;
+}
+
+.page {
+    position: absolute;
+    width: 300px;
+    height: 250px;
+    top: 0;
+    left: 0;
+    background-color: black;
+    overflow: hidden;
+}
+
+.container {
+    position: inherit;
+    width: inherit;
+    height: inherit;
+    pointer-events: none;
+    background-size: cover;
+}
+
+.button {
+    pointer-events: auto;
+    cursor: pointer;
+}
