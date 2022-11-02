@@ -1,4 +1,25 @@
-addEvent(window, 'DOMContentLoaded', ondomloaded);
+if (shellParams.useEnabler) {
+    addEvent(window, 'DOMContentLoaded', function(){
+        loadScript('https://s0.2mdn.net/ads/studio/Enabler.js', function(){
+            if (!Enabler.isInitialized()) {
+                Enabler.addEventListener(studio.events.StudioEvent.INIT, enablerInitialized);
+            } else {
+                enablerInitialized();
+            }
+        }, 'anonymoous');
+    });
+} else {
+    addEvent(window, 'DOMContentLoaded', ondomloaded);
+}
+function enablerInitialized() {
+    if (!Enabler.isVisible()) {Enabler.addEventListener(studio.events.StudioEvent.VISIBLE, adVisible);
+    } else {
+        adVisible();
+    }
+}
+function adVisible() {
+    ondomloaded();
+}
 var canRoll = false, resolveTL, ctaRollTL;
 var firstTime = true;
 var resolve_bg, resolve_bgr_url = 'assets/resolve.mp4';
@@ -11,7 +32,7 @@ function ondomloaded(){
     // preloader
     // addImage('preloader-icon', fullPath + 'preloader.png');
     gsap.set('.line', {stroke: shellParams.unit.preloader.color});
-    //gsap.set('.line', {stroke: shellParams.unit.preloader.color});
+    gsap.set('#preloader', {backgroundColor:shellParams.unit.preloader.bgColor});
     gsap.set('#preloader-icon', {
         backgroundColor: shellParams.unit.preloader.bgColor,
         width: shellParams.unit.preloader.size,
@@ -24,7 +45,7 @@ function ondomloaded(){
     setupCTA();
     setupVideo();
 
-    if(indev){
+    if(shellParams.isDev){
         if(resolve_bg){
             resolve_bg.play().catch(e=>{
                 setTimeout(e=>{
@@ -108,12 +129,14 @@ function setupUnit(){
     }else{
         gsap.to('#audio', {duration:0, display:'none'});
     }
-    window.addEventListener('blur', ()=>{
-        onExit();
-        window.addEventListener('focus', ()=>{
+    if(!shellParams.useEnabler){
+        window.addEventListener('blur', ()=>{
             onExit();
+            window.addEventListener('focus', ()=>{
+                onExit();
+            });
         });
-    });
+    }
 }
 function onAudioTap(e){
     if(firstTime){
@@ -333,15 +356,18 @@ function onExit(e){
     stopVideo(resolve_rollover);
     hide('resolve_bg');
     show('resolve_rollover');
-    if(shellParams.rollover.active) gsap.set(shellParams.rollover.element, {autoAlpha:1, overwrite:'auto'})
+    if(shellParams.rollover.hideElements.active) gsap.set(shellParams.rollover.hideElements.element, {autoAlpha:1, overwrite:'auto'})
     gsap.to('#resolve_cta', {duration:0.01, opacity:1, overwrite:'auto'});
     if(shellParams.replay.hideOnRollover) show('resolve_replay');
     resolveTL.pause("end");
+    if(shellParams.useEnabler){
+        Enabler.exit("General Exit");
+    }
 }
 
 function setupVideo(){
     if(!resolve_bg){
-        resolve_bg = createVideo('resolve_bg', resolve_bgr_url, true, true);
+        resolve_bg = createVideo('resolve_bg', (shellParams.useEnabler ? Enabler.getUrl(resolve_bgr_url) : resolve_bgr_url), true, true);
         addEvent(resolve_bg, 'playing', onResolvePlay);
         addEvent(resolve_bg, 'pause', onResolvePause);
         addEvent(resolve_bg, 'timeupdate', onTimeUpdate);
@@ -351,7 +377,7 @@ function setupVideo(){
 
     if(shellParams.rollover.video){
         if(!resolve_rollover){
-            resolve_rollover = createVideo('resolve_rollover', resolve_rollover_url, false, true);
+            resolve_rollover = createVideo('resolve_rollover', (shellParams.useEnabler ? Enabler.getUrl(resolve_rollover_url) : resolve_rollover_url), false, true);
             resolve_rollover.load();
             addEvent(resolve_rollover, 'playing', onRolloverPlay);
             addEvent(resolve_rollover, 'timeupdate', onRolloverProgress);
@@ -391,30 +417,34 @@ function onResolveEnd(e){
     canRoll = true;
     hide('resolve_bg', shellParams.cta.ctaAnimation.duration);
 }
-var isRoll1 = false, isRoll2 = false;
+// var isRoll1 = false, isRoll2 = false;
 function onRolloverPlay(e){
-    isRoll1 = false;
-    isRoll2 = false;
+    e.target.hideState = false;
+    e.target.showState = false;
+    if(shellParams.rollover.hideElements.active && shellParams.rollover.hideElements.hide.time <= 0){
+        e.target.hideState = true;
+        gsap.to(shellParams.rollover.hideElements.elements, {opacity:0, overwrite:'auto', duration: shellParams.rollover.hideElements.hide.duration});
+    }
     if(shellParams.replay.hideOnRollover) hide('resolve_replay');
     canRoll = false;
 }
 function onRolloverProgress(e){
-    if(shellParams.rollover.active) {
-        if (resolve_rollover.currentTime >= shellParams.rollover.hideTiming){
-            if(!isRoll1) {
-                isRoll1 = true;
-                gsap.to(shellParams.rollover.element, {autoAlpha:0, overwrite:'auto', duration: shellParams.rollover.duration})
+    if(shellParams.rollover.hideElements.active) {
+        if (e.target.currentTime >= shellParams.rollover.hideElements.hide.time){
+            if(!e.target.hideState) {
+                e.target.hideState = true;
+                gsap.to(shellParams.rollover.hideElements.elements, {opacity:0, overwrite:'auto', duration: shellParams.rollover.hideElements.hide.duration})
             }
         }
-        if(resolve_rollover.currentTime >= shellParams.rollover.showTiming){
-            if(!isRoll2){
-                isRoll2 = true;
-                gsap.to(shellParams.rollover.element, {autoAlpha:1, overwrite:'auto', duration: shellParams.rollover.duration})
+        shellParams.rollover.hideElements.show.time = (shellParams.rollover.hideElements.show.time > e.target.duration) ? e.target.duration : shellParams.rollover.hideElements.show.time;
+        if(e.target.currentTime >= shellParams.rollover.hideElements.show.time){
+            if(!e.target.showState){
+                e.target.showState = true;
+                gsap.to(shellParams.rollover.hideElements.elements, {opacity:1, overwrite:'auto', duration: shellParams.rollover.hideElements.show.duration})
             }
 
         }
     }
-
 }
 function onRolloverEnd(e){
     if(shellParams.replay.hideOnRollover) show('resolve_replay', 0.3);
@@ -432,7 +462,7 @@ function createVideo(c,d,b,e,f){var a=document.createElement("video");a.setAttri
 function addEvent(a,b,c){a&&("string"===typeof a||a instanceof String?document.getElementById(a).addEventListener(b,c):a.addEventListener(b,c))}
 function removeEvent(a,b,c){a&&("string"===typeof a||a instanceof String?document.getElementById(a).removeEventListener(b,c):a.removeEventListener(b,c))};
 function tapcomponent(e,t,n,d){document.getElementById(e).addEventListener("click",t),n&&document.getElementById(e).addEventListener("mouseover",n),d&&document.getElementById(e).addEventListener("mouseout",d),n&&document.getElementById(e).addEventListener("touchstart",n,{passive:!0}),d&&document.getElementById(e).addEventListener("touchend",d,{passive:!0})}
-function addImage(e, t, n) {var d = document.getElementById(e);d && ("img" === d.nodeName.toLowerCase() || "gwd-img" === d.nodeName.toLowerCase() ? n && window.devicePixelRatio >= 2 ? d.src = (n) : d.src = (t) : d.style.backgroundImage = "url('" + (t) + "')")}
+function addImage(e, t, n) { var d = document.getElementById(e); d && ("img" === d.nodeName.toLowerCase() || "gwd-img" === d.nodeName.toLowerCase() ? n && window.devicePixelRatio >= 2 ? d.src = (n) : d.src = (t) : d.style.backgroundImage = "url('" + (shellParams.useEnabler ? Enabler.getUrl(t) : (t)) + "')")}
 function hide(o,a){gsap.to("#"+o,{duration:a?.3:0, autoAlpha:0, overwrite:'auto'})}function show(o,a){gsap.to("#"+o,{duration:a?.3:0,autoAlpha:1, overwrite:'auto'})}
 function fixFullPath(t){return 0<t.length?"/"===t.substr(t.length-1)?t:t+"/":""}
 function random(n,r){if(null==r&&(r=n,n=0),r<n){var a=n;n=r,r=a}return n+(r-n)*Math.random()}
@@ -452,4 +482,17 @@ HTMLElement.prototype.soundButton = function(e){
     '<path id="auline2" class="fill_color" style="fill:'+e+'" d="M38.857,22.48c0,0 3.212,2.655 3.212,7.102c0,4.47 -3.235,7.304 -3.235,7.304c-0.415,0.363 -0.458,0.995 -0.095,1.411c0.363,0.416 0.995,0.458 1.411,0.095c0,0 3.919,-3.414 3.919,-8.81c0,-5.421 -3.942,-8.647 -3.942,-8.647c-0.426,-0.35 -1.057,-0.289 -1.407,0.138c-0.351,0.426 -0.289,1.057 0.137,1.407Z" />',
     this.appendChild(t);
     return this;
+}
+function loadScript(e, t, a) {
+	var n = document.createElement("script");
+	(n.async = !0), a && (n.crossOrigin = a), (n.src = e);
+	var o = document.getElementsByTagName("head")[0];
+	o.appendChild(n),
+		(n.onload = n.onreadystatechange =
+			function () {
+				(n.readyState && !/complete|loaded/.test(n.readyState)) ||
+					("function" == typeof t && t(),
+					(n.onload = null),
+					(n.onreadystatechange = null));
+			});
 }

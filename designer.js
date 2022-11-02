@@ -1,14 +1,15 @@
 var fullPath = '';
-var indev = false;
 var shellParams = {
+    isDev: false,
+    useEnabler: false,
     unit: {
         width: 300,
         height: 250,
-        backgroundColor: 'black',
+        backgroundColor: '#282729',
         preloader: {
-            bgColor: "transparant",
+            bgColor: "#282729",
             color: '#BB8740',                /* preloader color, use color HEX code or leave it blank for UNFOLD default color */
-            size: 24
+            size: 56
         },
         border: {
             color: '#BB8740',                /* border color, use color HEX code or leave it blank for none */
@@ -63,43 +64,55 @@ var shellParams = {
         replayOn: '#e3e3e3',                /* optional */
         inverseRotation: false,
         position: {
-            on: "top-left",            /* `top-left`, `top-right`, `bottom-left`, `bottom-right` */
+            on: "top-left",                 /* `top-left`, `top-right`, `bottom-left`, `bottom-right` */
             xOffset: 0,                   /* x offset based on “on” position */
-            yOffset: 0                    /* y offset based on “on” position */ ,
+            yOffset: 0                    /* y offset based on “on” position */,
             iconPadding: 6                 /* the icon padding based on X & Y position */
         },
         hideOnRollover: false              /* boolean */
     },
     rollover: {
-        video: 1,
-        active: false,
-        duration: 0.3,
-        hideTiming: 0.1,
-        showTiming: 3.3,
-        element: []
+        video: true, /* True if the rollover is using Video, False if the rollover using codes */
+        hideElements: {
+            active: true, /* if true hovering over the CTA will hide specified elements */
+            hide: {
+                time: 0, /* when the elements should hide */
+                duration: 0.3 /* duration of the hiding animation of the elements */
+            },
+            show: {
+                time: 4, /* when the elements should show */
+                duration: 0.3 /* duration of the showing animation of the elements */
+            },
+            elements: ['#resolve_logo'] /* specified elements */
+        }
     }
 }
 
 /* Custom assets, resolve animation & cta rollover animation */
-function customAssets(_path){
-    if(indev) addImage('backup', _path + 'backup.jpg');
+function customAssets(_path) {
+    if (shellParams.isDev) {
+        addImage('backup', _path + 'backup.png');
+        gsap.set('#backup', {opacity:.5});
+    }
     // addImage('resolve_date', _path + 'resolve_date_1.png');
-    gsap.set('#resolve_cta', {borderRadius:3});
+    gsap.set('#resolve_cta', { borderRadius: 3 });
+    gsap.set('#resolve_logo', { backgroundColor: 'rgba(255, 143, 200, 0.5)', top: -70, right: -100, left: 'unset', borderRadius: '50%', scaleX: 0.2, scaleY: 0.23 });
 }
-function customResolveTL(_tl){
-    _tl.from('#resolve_cta', {autoAlpha:0, duration:0.01, ease:'none'}, 'start+='+shellParams.cta.ctaAnimation.start);
-    _tl.from(['.cta_off'], {y:-29, duration:0.6, ease:'power2.out'}, '<');
+function customResolveTL(_tl) {
+    _tl.from('#resolve_cta', { autoAlpha: 0, duration: 0.01, ease: 'none' }, 'start+=' + shellParams.cta.ctaAnimation.start);
+    _tl.from(['.cta_off'], { y: -29, duration: 0.6, ease: 'power2.out' }, '<');
+    _tl.from('#resolve_logo', { opacity: 0, y: -100, duration: 1, ease: 'elastic.out' }, '<');
     return _tl;
 }
-function customCTARollTL(_tl){
+function customCTARollTL(_tl) {
     // _tl.to('.cta_on', {opacity:1, duration:0.5, ease:'none'}, 'start');
     return _tl;
 }
-function customRoll(ctaRollTL){
+function customRoll(ctaRollTL) {
     // ctaRollTL.tweenFromTo('start', 'out');
     ctaRollTL.play(0);
 }
-function customOut(ctaRollTL){
+function customOut(ctaRollTL) {
     // ctaRollTL.tweenFromTo('out', 'end');
     ctaRollTL.reverse();
 }

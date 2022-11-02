@@ -20,7 +20,7 @@ svg {
 }
 
 #preloader {
-    background: white;
+    background: inherit;
 }
 
 #preloader-icon {
@@ -43,7 +43,6 @@ svg {
 }
 
 .line {
-    stroke: #00c6f6;
     stroke-width: 1;
 }
 
@@ -113,7 +112,7 @@ svg {
 #resolve_cta_border {
     width: calc(100% - 2px);
     height: calc(100% - 2px);
-    border: 1px solid #ff3c00;
+    border: 1px solid transparent;
 }
 
 #replay_icon {
