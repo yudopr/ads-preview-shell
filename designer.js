@@ -1,7 +1,6 @@
 var fullPath = '';
 var shellParams = {
     isDev: false,
-    useEnabler: false, /* IMPORTANT!! We have to manually put Enabler's script tag on the HTML for DC Studio to detect it. DC Studio won't detect generated script tag for their Enabler */
     unit: {
         width: 300,
         height: 250,
@@ -9,7 +8,7 @@ var shellParams = {
         preloader: {
             bgColor: "#282729",
             color: '#BB8740',                /* preloader color, use color HEX code or leave it blank for UNFOLD default color */
-            size: 56
+            size: 20
         },
         border: {
             color: '#BB8740',                /* border color, use color HEX code or leave it blank for none */
@@ -26,7 +25,7 @@ var shellParams = {
                 xOffset: -2,                /* x offset based on “on” position */
                 yOffset: -2                /* y offset based on “on” position */
             },
-            disappearAt: 1.9                 /* set audio button disappear time in second  */
+            disappearAt: 1.5                 /* set audio button disappear time in second  */
         }
     },
     cta: {
@@ -43,10 +42,10 @@ var shellParams = {
             start: 1,                     /* in seconds */
             duration: 0.4,                    /* in second */
             animationIn: {
-                type: "custom",             /* `fade`, `slide`, `slideFade`, `scaleFade`, `custom` */
+                type: "slideFade",             /* `fade`, `slide`, `slideFade`, `scaleFade`, `custom` */
                 from: {
                     x: 0,                   /* in pixel */
-                    y: 0,                   /* in pixel */
+                    y: -10,                   /* in pixel */
                     scale: 1                /* 1 = 100%, 1.05 = 105%, etc*/
                 }
             },
@@ -83,7 +82,20 @@ var shellParams = {
                 time: 4, /* when the elements should show */
                 duration: 0.3 /* duration of the showing animation of the elements */
             },
-            elements: ['#resolve_logo'] /* specified elements */
+            elements: ['#resolve_logo', '#resolve_laurel'] /* specified elements */
+        }
+    },
+    enabler: {
+        active:false, /* IMPORTANT!! If TRUE We have to manually put Enabler's script tag on the HTML for DC Studio to detect it. DC Studio won't detect generated script tag for their Enabler */
+        singleExit: false, /* If false each clickable element on the banner will generate its own report */
+        exits: {
+            generic: "https://google.com",
+            default(){Enabler.exit("Main Exit")},
+            cta(){Enabler.exit("CTA 1 Exit")},
+        },
+        counters:{
+            replay(){Enabler.counter("Replay", true)},
+            rollover(){Enabler.counter("Rollover", true)},
         }
     }
 }
@@ -94,14 +106,14 @@ function customAssets(_path) {
         addImage('backup', _path + 'backup.png');
         gsap.set('#backup', {opacity:.5});
     }
-    // addImage('resolve_date', _path + 'resolve_date_1.png');
+    addImage('resolve_laurel', _path + 'info.png');
     gsap.set('#resolve_cta', { borderRadius: 3 });
     gsap.set('#resolve_logo', { backgroundColor: 'rgba(255, 143, 200, 0.5)', top: -70, right: -100, left: 'unset', borderRadius: '50%', scaleX: 0.2, scaleY: 0.23 });
 }
 function customResolveTL(_tl) {
     _tl.from('#resolve_cta', { autoAlpha: 0, duration: 0.01, ease: 'none' }, 'start+=' + shellParams.cta.ctaAnimation.start);
     _tl.from(['.cta_off'], { y: -29, duration: 0.6, ease: 'power2.out' }, '<');
-    _tl.from('#resolve_logo', { opacity: 0, y: -100, duration: 1, ease: 'elastic.out' }, '<');
+    _tl.from(['#resolve_laurel', '#resolve_logo'], { opacity: 0, y: -100, duration: 1, ease: 'elastic.out' }, '<');
     return _tl;
 }
 function customCTARollTL(_tl) {
