@@ -1,7 +1,7 @@
 var fullPath = '';
 var shellParams = {
     isDev: false,
-    useEnabler: false,
+    useEnabler: false, /* IMPORTANT!! We have to manually put Enabler's script tag on the HTML for DC Studio to detect it. DC Studio won't detect generated script tag for their Enabler */
     unit: {
         width: 300,
         height: 250,

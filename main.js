@@ -1,12 +1,10 @@
 if (shellParams.useEnabler) {
     addEvent(window, 'DOMContentLoaded', function(){
-        loadScript('https://s0.2mdn.net/ads/studio/Enabler.js', function(){
-            if (!Enabler.isInitialized()) {
-                Enabler.addEventListener(studio.events.StudioEvent.INIT, enablerInitialized);
-            } else {
-                enablerInitialized();
-            }
-        }, 'anonymoous');
+        if (!Enabler.isInitialized()) {
+            Enabler.addEventListener(studio.events.StudioEvent.INIT, enablerInitialized);
+        } else {
+            enablerInitialized();
+        }
     });
 } else {
     addEvent(window, 'DOMContentLoaded', ondomloaded);
